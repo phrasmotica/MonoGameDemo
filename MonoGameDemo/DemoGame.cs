@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameDemo.Components;
 
 namespace MonoGameDemo
 {
@@ -17,20 +18,19 @@ namespace MonoGameDemo
         public GraphicsDeviceManager Graphics { get; }
         public SpriteBatch SpriteBatch { get; private set; }
 
-        public int BallCount => Components.OfType<Ball>().Count();
-
         protected override void Initialize()
         {
-            Components.Add(new Ball(this));
+            SetWindowSize();
 
-            var button = new Button(this, Content.Load<Texture2D>("button"), Content.Load<SpriteFont>("font"))
-            {
-                Position = new Vector2(10, 10),
-                TextFunc = () => $"Create Ball ({BallCount})",
-                OnClick = () => Components.Add(new Ball(this)),
-            };
+            var font = Content.Load<SpriteFont>("font");
 
-            Components.Add(button);
+            var player = new CharacterComponent(this, font, false);
+            Components.Add(player);
+
+            var enemy = new CharacterComponent(this, font, true);
+            Components.Add(enemy);
+
+            Components.Add(new AttacksComponent(this, player.Attacks, enemy));
 
             base.Initialize();
         }
@@ -57,6 +57,13 @@ namespace MonoGameDemo
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             base.Draw(gameTime);
+        }
+
+        private void SetWindowSize()
+        {
+            Graphics.PreferredBackBufferWidth = 800;
+            Graphics.PreferredBackBufferHeight = 600;
+            Graphics.ApplyChanges();
         }
     }
 }
