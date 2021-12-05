@@ -5,6 +5,10 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameDemo.Components
 {
+    /// <summary>
+    /// Component for rendering a clickable button. Adapted from
+    /// https://github.com/Oyyou/MonoGame_Tutorials/blob/master/MonoGame_Tutorials/Tutorial012/Controls/Button.cs.
+    /// </summary>
     public class ButtonComponent : DrawableGameComponent
     {
         private readonly DemoGame _game;
@@ -35,6 +39,8 @@ namespace MonoGameDemo.Components
         public Func<string> TextFunc { get; set; }
         public string Text => TextFunc();
 
+        public bool Disabled { get; set; }
+
         public override void Update(GameTime gameTime)
         {
             var currentMouse = Mouse.GetState();
@@ -43,7 +49,7 @@ namespace MonoGameDemo.Components
 
             _isHovering = false;
 
-            if (mouseRectangle.Intersects(Rectangle))
+            if (!Disabled && mouseRectangle.Intersects(Rectangle))
             {
                 _isHovering = true;
 
@@ -54,13 +60,20 @@ namespace MonoGameDemo.Components
             }
 
             _lastMouse = currentMouse;
+
+            base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime)
         {
             var colour = Color.White;
 
-            if (_isHovering)
+            if (Disabled)
+            {
+                colour = Color.LightGray;
+                PenColour = Color.Gray;
+            }
+            else if (_isHovering)
             {
                 colour = Color.Gray;
             }

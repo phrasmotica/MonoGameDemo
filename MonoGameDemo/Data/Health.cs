@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
 
 namespace MonoGameDemo.Data
 {
@@ -15,7 +15,7 @@ namespace MonoGameDemo.Data
 
         public int Damage(int amount)
         {
-            var actualAmount = Math.Min(amount, Current);
+            var actualAmount = MathHelper.Min(amount, Current);
             Current -= actualAmount;
             return actualAmount;
         }

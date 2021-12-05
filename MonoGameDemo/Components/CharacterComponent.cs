@@ -23,6 +23,24 @@ namespace MonoGameDemo.Components
 
             Health = new Health(100);
             Attacks = new List<Attack>();
+
+            if (_isEnemy)
+            {
+                _position = new Vector2(600, 50);
+
+                Name = "Wowowow";
+            }
+            else
+            {
+                _position = new Vector2(50, 350);
+
+                Name = "Pick Pick Pick";
+
+                Attacks.Add(new Attack("Scratch", 10));
+                Attacks.Add(new Attack("Peck", 20));
+                Attacks.Add(new Attack("Clonk", 40));
+                Attacks.Add(new Attack("Throw", 30));
+            }
         }
 
         private ContentManager Content => _game.Content;
@@ -32,26 +50,7 @@ namespace MonoGameDemo.Components
         public Health Health { get; set; }
         public List<Attack> Attacks { get; }
 
-        public override void Initialize()
-        {
-            if (_isEnemy)
-            {
-                _position = new Vector2(600, 50);
-                Name = "Wowowow";
-            }
-            else
-            {
-                _position = new Vector2(50, 350);
-                Name = "Pick Pick Pick";
-
-                Attacks.Add(new Attack("Scratch", 10));
-                Attacks.Add(new Attack("Peck", 20));
-                Attacks.Add(new Attack("Clonk", 40));
-                Attacks.Add(new Attack("Throw", 30));
-            }
-
-            base.Initialize();
-        }
+        public bool IsFainted => Health.Current <= 0;
 
         protected override void LoadContent()
         {
@@ -75,7 +74,10 @@ namespace MonoGameDemo.Components
 
             // draw sprite
             var healthTextOffsetY = _spriteFont.MeasureString(healthText).Y + 10;
-            SpriteBatch.Draw(_texture, _position + new Vector2(0, nameTextOffsetY + healthTextOffsetY), null, Color.White, 0, Vector2.Zero, 0.7f, SpriteEffects.None, 0);
+
+            var effects = IsFainted ? SpriteEffects.FlipVertically : SpriteEffects.None;
+
+            SpriteBatch.Draw(_texture, _position + new Vector2(0, nameTextOffsetY + healthTextOffsetY), null, Color.White, 0, Vector2.Zero, 0.7f, effects, 0);
 
             SpriteBatch.End();
 

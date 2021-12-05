@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameDemo.Components;
@@ -30,7 +29,12 @@ namespace MonoGameDemo
             var enemy = new CharacterComponent(this, font, true);
             Components.Add(enemy);
 
-            Components.Add(new AttacksComponent(this, player.Attacks, enemy));
+            var textBox = new TextBoxComponent(this, font);
+            Components.Add(textBox);
+
+            Components.Add(new AttacksComponent(this, player.Attacks, enemy, textBox));
+
+            textBox.AddText($"What will {player.Name} do?");
 
             base.Initialize();
         }
