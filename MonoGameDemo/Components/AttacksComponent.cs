@@ -46,6 +46,6 @@ namespace MonoGameDemo.Components
             base.Initialize();
         }
 
-        public void Disable() => _buttons.ForEach(b => b.Disabled = true);
+        public void Disable() => _buttons.ForEach(b => b.ForceDisabled = true);
     }
 }

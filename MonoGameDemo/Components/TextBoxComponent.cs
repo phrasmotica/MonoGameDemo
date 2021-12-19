@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameDemo.Components
 {
@@ -16,8 +15,9 @@ namespace MonoGameDemo.Components
         private readonly Vector2 _position;
         private readonly Texture2D _backgroundTexture;
 
-        private KeyboardState lastKeyboard;
         private int entryIndex;
+        private ButtonComponent prevButton;
+        private ButtonComponent nextButton;
 
         public TextBoxComponent(DemoGame game, SpriteFont font) : base(game)
         {
@@ -43,23 +43,44 @@ namespace MonoGameDemo.Components
             EntryIndex = _textEntries.Count - 1;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Initialize()
         {
-            var currentKeyboard = Keyboard.GetState();
+            InitialiseButtons();
 
-            if (currentKeyboard.IsKeyDown(Keys.Right) && lastKeyboard.IsKeyUp(Keys.Right))
+            base.Initialize();
+        }
+
+        private void InitialiseButtons()
+        {
+            var prevText = "Prev";
+            var prevTextSize = _font.MeasureString(prevText);
+
+            var texture = _game.Content.Load<Texture2D>("button");
+            var buttonWidth = texture.Width * 0.5f;
+            var buttonHeight = texture.Height;
+
+            prevButton = new ButtonComponent(_game, texture, null, 0.5f)
             {
-                EntryIndex++;
-            }
+                TextFunc = () => prevText,
+                Position = _position + new Vector2(5, _backgroundTexture.Height - buttonHeight - 5),
+                OnClick = () => EntryIndex--,
+                DisabledFunc = () => EntryIndex <= 0,
+            };
 
-            if (currentKeyboard.IsKeyDown(Keys.Left) && lastKeyboard.IsKeyUp(Keys.Left))
+            _game.Components.Add(prevButton);
+
+            var nextText = "Next";
+            var nextTextSize = _font.MeasureString(nextText);
+
+            nextButton = new ButtonComponent(_game, texture, null, 0.5f)
             {
-                EntryIndex--;
-            }
+                TextFunc = () => nextText,
+                Position = _position + new Vector2(_backgroundTexture.Width - buttonWidth - 5, _backgroundTexture.Height - buttonHeight - 5),
+                OnClick = () => EntryIndex++,
+                DisabledFunc = () => EntryIndex >= _textEntries.Count - 1,
+            };
 
-            lastKeyboard = currentKeyboard;
-
-            base.Update(gameTime);
+            _game.Components.Add(nextButton);
         }
 
         public override void Draw(GameTime gameTime)

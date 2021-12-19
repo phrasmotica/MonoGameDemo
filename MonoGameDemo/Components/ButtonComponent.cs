@@ -12,17 +12,19 @@ namespace MonoGameDemo.Components
     public class ButtonComponent : DrawableGameComponent
     {
         private readonly DemoGame _game;
-        private readonly SpriteFont _font;
         private readonly Texture2D _texture;
+        private readonly SpriteFont _font;
+        private readonly float _xScale;
 
         private MouseState _lastMouse;
         private bool _isHovering;
 
-        public ButtonComponent(DemoGame game, Texture2D texture = null, SpriteFont font = null) : base(game)
+        public ButtonComponent(DemoGame game, Texture2D texture = null, SpriteFont font = null, float xScale = 1) : base(game)
         {
             _game = game;
             _texture = texture ?? _game.Content.Load<Texture2D>("button");
             _font = font ?? _game.Content.Load<SpriteFont>("font");
+            _xScale = xScale;
             PenColour = Color.Black;
         }
 
@@ -34,12 +36,14 @@ namespace MonoGameDemo.Components
 
         public Vector2 Position { get; set; }
 
-        public Rectangle Rectangle => new((int) Position.X, (int) Position.Y, _texture.Width, _texture.Height);
+        public Rectangle Rectangle => new((int) Position.X, (int) Position.Y, (int) (_texture.Width * _xScale), _texture.Height);
 
         public Func<string> TextFunc { get; set; }
         public string Text => TextFunc();
 
-        public bool Disabled { get; set; }
+        public bool ForceDisabled { get; set; }
+        public Func<bool> DisabledFunc { get; set; }
+        public bool Disabled => ForceDisabled || (DisabledFunc?.Invoke() ?? false);
 
         public override void Update(GameTime gameTime)
         {
@@ -67,6 +71,7 @@ namespace MonoGameDemo.Components
         public override void Draw(GameTime gameTime)
         {
             var colour = Color.White;
+            PenColour = Color.Black;
 
             if (Disabled)
             {
