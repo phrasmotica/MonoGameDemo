@@ -72,6 +72,11 @@ namespace MonoGameDemo.Components
             var wrappedText = WrapText(CurrentText, maxTextWidth);
             _game.SpriteBatch.DrawString(_font, wrappedText, _position + new Vector2(5, 5), Color.Black);
 
+            var indexText = $"{EntryIndex + 1}/{_textEntries.Count}";
+            var indexTextSize = _font.MeasureString(indexText);
+            var indexPosition = _position + new Vector2(5, _backgroundTexture.Height - 5 - indexTextSize.Y);
+            _game.SpriteBatch.DrawString(_font, $"{EntryIndex + 1}/{_textEntries.Count}", indexPosition, Color.Black);
+
             _game.SpriteBatch.End();
 
             base.Draw(gameTime);

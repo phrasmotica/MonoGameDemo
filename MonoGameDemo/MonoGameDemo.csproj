@@ -27,4 +27,15 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="BattleSystem.Abstractions">
+      <HintPath>..\..\BattleSystem.Abstractions\BattleSystem.Abstractions\bin\Debug\net5.0\BattleSystem.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="BattleSystem.Battles">
+      <HintPath>..\..\BattleSystem.Battles\BattleSystem.Battles\bin\Debug\net5.0\BattleSystem.Battles.dll</HintPath>
+    </Reference>
+    <Reference Include="BattleSystem.Core">
+      <HintPath>..\..\BattleSystem.Core\BattleSystem.Core\bin\Debug\net5.0\BattleSystem.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

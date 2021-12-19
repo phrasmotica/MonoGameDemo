@@ -1,12 +1,22 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using BattleSystem.Abstractions.Control;
+using BattleSystem.Battles.TurnBased;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameDemo.Battle;
 using MonoGameDemo.Components;
 
 namespace MonoGameDemo
 {
     public class DemoGame : Game
     {
+        private CharacterComponent enemy;
+        private PatientCharacter[] characters;
+        private PatientTurnBasedBattle battle;
+        private IGameOutput gameOutput;
+        private AttacksComponent attacksComponent;
+
         public DemoGame()
         {
             Graphics = new GraphicsDeviceManager(this);
@@ -26,15 +36,26 @@ namespace MonoGameDemo
             var player = new CharacterComponent(this, font, false);
             Components.Add(player);
 
-            var enemy = new CharacterComponent(this, font, true);
+            enemy = new CharacterComponent(this, font, true);
             Components.Add(enemy);
 
             var textBox = new TextBoxComponent(this, font);
             Components.Add(textBox);
 
-            Components.Add(new AttacksComponent(this, player.Attacks, enemy, textBox));
+            var moveProcessor = new MoveProcessor();
+            gameOutput = new TextBoxGameOutput(textBox);
 
-            textBox.AddText($"What will {player.Name} do?");
+            characters = new[] { player.Character, enemy.Character };
+
+            battle = new PatientTurnBasedBattle(
+                moveProcessor,
+                new ActionHistory(),
+                gameOutput,
+                characters
+            );
+
+            attacksComponent = new AttacksComponent(this, player);
+            Components.Add(attacksComponent);
 
             base.Initialize();
         }
@@ -51,6 +72,28 @@ namespace MonoGameDemo
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 Exit();
+            }
+
+            while (battle.CurrentPhase < BattlePhase.TurnChoice)
+            {
+                battle.Next();
+            }
+
+            if (!enemy.Character.HasChosenMove)
+            {
+                enemy.Character.SetRandomMoveChoice();
+            }
+
+            if (characters.All(c => c.HasChosenMove))
+            {
+                battle.Next(); // now at turn execute
+                battle.Next(); // now at turn end
+                battle.Next(); // now at turn start or battle end
+            }
+
+            if (battle.CurrentPhase == BattlePhase.BattleEnd)
+            {
+                attacksComponent.Disable();
             }
 
             base.Update(gameTime);

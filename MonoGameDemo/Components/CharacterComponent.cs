@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using BattleSystem.Core.Abilities;
+using BattleSystem.Core.Actions.Damage;
+using BattleSystem.Core.Moves;
+using BattleSystem.Core.Stats;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameDemo.Data;
+using MonoGameDemo.Battle;
 
 namespace MonoGameDemo.Components
 {
@@ -21,36 +25,113 @@ namespace MonoGameDemo.Components
             _spriteFont = spriteFont;
             _isEnemy = isEnemy;
 
-            Health = new Health(100);
-            Attacks = new List<Attack>();
-
             if (_isEnemy)
             {
                 _position = new Vector2(600, 50);
 
-                Name = "Wowowow";
+                var moveSet = new MoveSet();
+
+                moveSet.AddMove(
+                    new MoveBuilder()
+                        .Name("Scratch")
+                        .Describe("Scratches the target.")
+                        .WithMaxUses(40)
+                        .AlwaysSucceeds()
+                        .WithAction(
+                            new DamageActionBuilder()
+                                .AbsoluteDamage(10)
+                                .TargetsFirstEnemy()
+                                .Build()
+                        )
+                        .Build()
+                );
+
+                Character = new PatientCharacter("Wowowow", "b", 100, new StatSet
+                {
+                    Attack = new Stat(3),
+                    Defence = new Stat(3),
+                    Speed = new Stat(2),
+                }, moveSet, new Ability(), new Random());
             }
             else
             {
                 _position = new Vector2(50, 350);
 
-                Name = "Pick Pick Pick";
+                var moveSet = new MoveSet();
 
-                Attacks.Add(new Attack("Scratch", 10));
-                Attacks.Add(new Attack("Peck", 20));
-                Attacks.Add(new Attack("Clonk", 40));
-                Attacks.Add(new Attack("Throw", 30));
+                moveSet.AddMove(
+                    new MoveBuilder()
+                        .Name("Scratch")
+                        .Describe("Scratches the target.")
+                        .WithMaxUses(40)
+                        .AlwaysSucceeds()
+                        .WithAction(
+                            new DamageActionBuilder()
+                                .AbsoluteDamage(10)
+                                .TargetsFirstEnemy()
+                                .Build()
+                        )
+                        .Build()
+                );
+
+                moveSet.AddMove(
+                    new MoveBuilder()
+                        .Name("Peck")
+                        .Describe("Pecks the target.")
+                        .WithMaxUses(30)
+                        .AlwaysSucceeds()
+                        .WithAction(
+                            new DamageActionBuilder()
+                                .AbsoluteDamage(20)
+                                .TargetsFirstEnemy()
+                                .Build()
+                        )
+                        .Build()
+                );
+
+                moveSet.AddMove(
+                    new MoveBuilder()
+                        .Name("Clonk")
+                        .Describe("Clonks the target with a pointy elbow.")
+                        .WithMaxUses(20)
+                        .AlwaysSucceeds()
+                        .WithAction(
+                            new DamageActionBuilder()
+                                .AbsoluteDamage(40)
+                                .TargetsFirstEnemy()
+                                .Build()
+                        )
+                        .Build()
+                );
+
+                moveSet.AddMove(
+                    new MoveBuilder()
+                        .Name("Throw")
+                        .Describe("Throws the target in a big bear hug.")
+                        .WithMaxUses(35)
+                        .AlwaysSucceeds()
+                        .WithAction(
+                            new DamageActionBuilder()
+                                .AbsoluteDamage(30)
+                                .TargetsFirstEnemy()
+                                .Build()
+                        )
+                        .Build()
+                );
+
+                Character = new PatientCharacter("Pick Pick Pick", "a", 100, new StatSet
+                {
+                    Attack = new Stat(3),
+                    Defence = new Stat(3),
+                    Speed = new Stat(3),
+                }, moveSet, new Ability(), new Random());
             }
         }
 
         private ContentManager Content => _game.Content;
         private SpriteBatch SpriteBatch => _game.SpriteBatch;
 
-        public string Name { get; set; }
-        public Health Health { get; set; }
-        public List<Attack> Attacks { get; }
-
-        public bool IsFainted => Health.Current <= 0;
+        public PatientCharacter Character { get; }
 
         protected override void LoadContent()
         {
@@ -65,17 +146,18 @@ namespace MonoGameDemo.Components
             SpriteBatch.Begin();
 
             // draw name text
-            SpriteBatch.DrawString(_spriteFont, Name, _position, Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            SpriteBatch.DrawString(_spriteFont, Character.Name, _position, Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
 
             // draw health text
-            var healthText = $"{Health.Current}HP/{Health.Max}HP";
-            var nameTextOffsetY = _spriteFont.MeasureString(Name).Y + 10;
+            var currentHealth = Math.Max(0, Character.CurrentHealth);
+            var healthText = $"{currentHealth}HP/{Character.MaxHealth}HP";
+            var nameTextOffsetY = _spriteFont.MeasureString(Character.Name).Y + 10;
             SpriteBatch.DrawString(_spriteFont, healthText, _position + new Vector2(0, nameTextOffsetY), Color.Black, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
 
             // draw sprite
             var healthTextOffsetY = _spriteFont.MeasureString(healthText).Y + 10;
 
-            var effects = IsFainted ? SpriteEffects.FlipVertically : SpriteEffects.None;
+            var effects = Character.IsDead ? SpriteEffects.FlipVertically : SpriteEffects.None;
 
             SpriteBatch.Draw(_texture, _position + new Vector2(0, nameTextOffsetY + healthTextOffsetY), null, Color.White, 0, Vector2.Zero, 0.7f, effects, 0);
 
